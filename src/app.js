@@ -2,12 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import qs from "qs";
 import { connectDB } from "./config/db.js";
-
-// import path from "path";
-// import { fileURLToPath } from "url";
-
-// // const __filename = fileURLToPath(import.meta.url);
-// // const __dirname = path.dirname(__filename);
+import AppError from "./utils/appError.js";
+import { globalErrorHandler } from "./controllers/errors.controller.js";
 
 // Routes
 import toursRoute from "./routes/tours.route.js";
@@ -37,10 +33,19 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Logs requests, usefull info in dev mode
 }
 app.use(express.json()); // Parsing JSON
-// app.use(express.static(`${__dirname}/public`));
 
 app.use("/api/v1/tours", toursRoute);
 app.use("/api/v1/users", usersRoute);
+
+// 404 route handler
+app.use((req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl}`, 404));
+});
+
+// Global Error handling middleware
+// Express recognizses this as a error handling middleware automatically
+// errors passed in next() will be automatically sent to this middleware, bypassing all other middleware in the stack
+app.use(globalErrorHandler);
 
 // Run Server
 const PORT = process.env.PORT;
