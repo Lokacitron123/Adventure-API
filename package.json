@@ -5,8 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=config.env src/server.js",
-    "dev": "node --trace-warnings --env-file=config.env --watch src/server.js"
+    "start": "node --env-file=config.env src/app.js",
+    "dev": "node --trace-warnings --env-file=config.env --watch src/app.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +17,10 @@
     "express-rate-limit": "^8.1.0",
     "express-validator": "^7.2.1",
     "mongoose": "^8.18.1",
-    "qs": "^6.14.0"
+    "qs": "^6.14.0",
+    "slugify": "^1.6.6",
+    "validator": "^13.15.15",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "morgan": "^1.10.1"
