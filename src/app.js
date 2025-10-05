@@ -9,10 +9,17 @@ import { globalErrorHandler } from "./controllers/errors.controller.js";
 import toursRoute from "./routes/tours.route.js";
 import usersRoute from "./routes/users.route.js";
 
-// DB Connection
-connectDB();
+process.on("uncaughtException", (error) => {
+  console.log("Uncaught Exception! Shutting down...");
+  console.log(error.name, error.message);
+
+  process.exit(1);
+});
 
 const app = express();
+
+// DB Connection
+connectDB();
 
 // Use extended query parser for bracketed query strings
 // app.set("query parser", "extended");// does the same as QS but qs is more powerful for deeply nested params values
@@ -49,4 +56,19 @@ app.use(globalErrorHandler);
 
 // Run Server
 const PORT = process.env.PORT;
-app.listen(PORT, console.log(`App running on PORT ${PORT}...`));
+const server = app.listen(PORT, console.log(`App running on PORT ${PORT}...`));
+
+// Error handlers that doesnt revolve around MongoDB or Express
+process.on("unhandledRejection", (error) => {
+  console.log("Unhandled Reject! Shutting down...");
+  console.log(error.name, error.message);
+  server.close(() => process.exit(1));
+});
+
+// process.on("uncaughtException", (error) => {
+//   console.log("Uncaught Exception! Shutting down...");
+//   console.log(error.name, error.message);
+//   server.close(() => {
+//     process.exit(1);
+//   });
+// });

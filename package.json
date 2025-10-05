@@ -5,8 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=config.env src/app.js",
-    "dev": "node --trace-warnings --env-file=config.env --watch src/app.js"
+    "start": "node --env-file=.config.env src/app.js",
+    "dev": "node --trace-warnings --env-file=.config.env --watch src/app.js"
   },
   "author": "",
   "license": "ISC",

@@ -145,23 +145,17 @@ export const postTour = catchAsync(async (req, res, next) => {
 });
 
 export const updateTour = catchAsync(async (req, res, next) => {
-  const updates = req.body;
-
-  const tour = await Tour.findById(req.tourId);
-
-  if (!updates || Object.keys(updates).length === 0) {
-    return next("Tour data is missing", 400);
-  }
-
-  if (!tour) {
+  const { tourId } = req;
+  const updatedTour = await Tour.findByIdAndUpdate(tourId, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedTour) {
     return res.status(404).json({
       status: "fail",
-      message: `Tour with id ${req.tourId} not found`,
+      message: `Tour with id ${tourId} not found`,
     });
   }
-
-  const updatedTour = await Tour.updateOne({ _id: tour._id }, { ...updates });
-
   res.status(200).json({
     status: "success",
     data: { updatedTour },
