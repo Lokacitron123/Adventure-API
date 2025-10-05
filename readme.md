@@ -43,6 +43,28 @@ ADVENTUREApi allows customers to search for and book various adventure tours, wh
 ### Installation
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/Lokacitron123/Tours-API.git
+   ```
+
+2. cd adventure-api:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a .env file:
+
+   ```bash
+     PORT=3000
+     MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/adventure
+     JWT_SECRET=your_jwt_secret
+     JWT_EXPIRES_IN=90d
+   ```
+
+4. Start the server:
+
+   ```bash
+   npm run dev
    ```
