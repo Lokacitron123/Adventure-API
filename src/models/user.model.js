@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import { minLength } from "zod";
 
 const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: [true, "Please provide a username"] },
     email: {
       type: String,
-      required: true,
+      required: [true, "Please provide your email"],
       unique: true,
       validate: {
         validator: (val) => validator.isEmail(val),
@@ -18,7 +19,15 @@ const userSchema = new Schema(
     role: { type: String, default: "user" },
     active: { type: Boolean, default: true },
     photo: String,
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: [true, "Please provide a password"],
+      minLength: 8,
+    },
+    confirmPassword: {
+      type: String,
+      required: [true, "Please confirm your password"],
+    },
   },
   { timestamps: true }
 );
