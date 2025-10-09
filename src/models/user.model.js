@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import { minLength } from "zod";
+import { genSalt, hash } from "bcrypt";
 
 const { Schema, model } = mongoose;
 
@@ -27,10 +27,31 @@ const userSchema = new Schema(
     confirmPassword: {
       type: String,
       required: [true, "Please confirm your password"],
+      validate: {
+        // Only works on CREATE and SAVE!
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: "Passwords do not match",
+      },
     },
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  // Only runs if modified
+  if (!this.isModified("password")) {
+    return next();
+  }
+  const saltRounds = Number(process.env.SALTROUNDS);
+  const salt = await genSalt(saltRounds);
+  this.password = await hash(this.password, salt);
+
+  this.confirmPassword = undefined;
+
+  next();
+});
 
 const User = model("User", userSchema);
 
