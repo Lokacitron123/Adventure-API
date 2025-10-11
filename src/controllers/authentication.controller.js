@@ -1,0 +1,139 @@
+import { promisify } from "node:util";
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
+import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
+
+const signToken = (id) => {
+  return jwt.sign({ id: id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+export const signUpUser = catchAsync(async (req, res, next) => {
+  const { name, email, password, confirmPassword } = req.body;
+
+  const newUser = await User.create({
+    name: name,
+    email: email,
+    password: password,
+    confirmPassword: confirmPassword,
+  });
+
+  const token = signToken(newUser._id);
+
+  res.status(201).json({
+    status: "success",
+    token,
+    data: {
+      user: newUser,
+    },
+  });
+});
+
+export const loginUser = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new AppError("Please provide email and password", 400));
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  // Option 1, less safe
+  // if (!user) {
+  //   return next(new AppError(`No user with email ${email} found.`, 404));
+  // }
+
+  // const correct = await user.correctPassword(password, user.password);
+
+  // if (!correct) {
+  //   return next(new AppError("Wrong password", 401));
+  // }
+
+  // Option 2
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError("Incorrect email or password provided", 401));
+  }
+
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: "success",
+    token,
+  });
+});
+
+export const logoutUser = catchAsync(async (req, res, next) => {
+  res.status(200).json({
+    status: "success",
+    message: "User successfully logged out",
+  });
+});
+
+// Protection Middleware
+export const protectRoute = catchAsync(async (req, res, next) => {
+  // (1), Get token
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next(
+      new AppError("You are not logged in! Please log in again.", 401)
+    );
+  }
+
+  // (2), Verify token
+  // Node's inbuilt promisify returns a function that returns promises
+  // Useful when you want to await, so that catchAsync can catch errors
+  // // const verifyAsync = await promisify(jwt.verify);
+  // const decoded = await verifyAsync(token, process.env.JWT_SECRET);
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  // (3), Check if user till exists
+  const user = await User.findById(decoded.id);
+
+  if (!user) {
+    return next(
+      new AppError(
+        "The user do not match this token, or no longer exists.",
+        401
+      )
+    );
+  }
+
+  // (4), Check if user changed password after token was issued using model instance method that returns a true or false value
+  if (user.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError("User recently changed password. Please log in again.", 401)
+    );
+  }
+
+  req.user = user;
+  next();
+});
+
+// Express calls middleware
+//
+export const restrictTo = (...roles) => {
+  // roles is equal to an array and is available in this outer scope
+  return (req, res, next) => {
+    // Express will call this function automatically
+    // but it can still access `roles` through closure
+
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action", 403)
+      );
+    }
+
+    next();
+  };
+};
