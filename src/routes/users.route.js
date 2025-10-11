@@ -6,6 +6,10 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/users.controller.js";
+import {
+  loginUser,
+  signUpUser,
+} from "../controllers/authentication.controller.js";
 
 const router = express.Router();
 
@@ -20,6 +24,9 @@ router.param("id", (req, res, next, val) => {
   req.userId = val;
   next();
 });
+
+router.route("/signup").post(signUpUser);
+router.route("/login").post(loginUser);
 
 router.route("/").get(getUsers).post(postUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
