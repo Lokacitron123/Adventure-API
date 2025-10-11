@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import { genSalt, hash } from "bcrypt";
+import { genSalt, hash, compare } from "bcrypt";
 
 const { Schema, model } = mongoose;
 
@@ -16,25 +16,31 @@ const userSchema = new Schema(
         message: "Email field must have a correct email format",
       },
     },
-    role: { type: String, default: "user" },
+    role: {
+      type: String,
+      enum: ["user", "guide", "lead-guide", "admin"],
+      default: "user",
+    },
     active: { type: Boolean, default: true },
     photo: String,
     password: {
       type: String,
       required: [true, "Please provide a password"],
       minLength: 8,
+      select: false, // Prevents password from showing in any output
     },
     confirmPassword: {
       type: String,
       required: [true, "Please confirm your password"],
       validate: {
-        // Only works on CREATE and SAVE!
+        // Only works on CREATE and SAVE
         validator: function (el) {
           return el === this.password;
         },
         message: "Passwords do not match",
       },
     },
+    passwordChangedAt: Date,
   },
   { timestamps: true }
 );
@@ -52,6 +58,45 @@ userSchema.pre("save", async function (next) {
 
   next();
 });
+
+userSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+
+  // If the password is being updated, hash it first.
+  // This is needed because findOneAndUpdate bypasses pre('save') middleware,
+  // so without this hook, updated passwords would be stored in plain text.
+  if (update.password) {
+    const salt = await genSalt(Number(process.env.SALTROUNDS) || 12);
+    update.password = await hash(update.password, salt);
+  }
+
+  // Ensure confirmPassword is never persisted
+  delete update.confirmPassword;
+
+  next();
+});
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+
+    // Returns true if changedTimestamp is larger than the JWTTimestamp
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  // false eqals password has not changed
+  return false;
+};
 
 const User = model("User", userSchema);
 
