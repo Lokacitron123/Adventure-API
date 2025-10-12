@@ -40,7 +40,7 @@ router
 router
   .route("/:id")
   .get(getTour)
-  .patch(protectRoute, updateTour)
-  .delete(protectRoute, deleteTour);
+  .patch(protectRoute, restrictTo("lead-guide", "admin"), updateTour)
+  .delete(protectRoute, restrictTo("lead-guide", "admin"), deleteTour);
 
 export default router;

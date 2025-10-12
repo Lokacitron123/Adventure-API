@@ -116,6 +116,7 @@ export const protectRoute = catchAsync(async (req, res, next) => {
     );
   }
 
+  // Passes the user with its roles to restrictTo in the request
   req.user = user;
   next();
 });
@@ -126,7 +127,7 @@ export const restrictTo = (...roles) => {
   // roles is equal to an array and is available in this outer scope
   return (req, res, next) => {
     // Express will call this function automatically
-    // but it can still access `roles` through closure
+    // but it can still access roles through javascript closure from the wrapper function
 
     if (!roles.includes(req.user.role)) {
       return next(
