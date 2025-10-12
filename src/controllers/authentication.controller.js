@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { sendEmail } from "../utils/email.js";
 
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -70,6 +71,43 @@ export const logoutUser = catchAsync(async (req, res, next) => {
     message: "User successfully logged out",
   });
 });
+
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("Email not found", 404));
+  }
+
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  // Send the email
+  try {
+    await sendEmail({ email, resetToken });
+
+    res.status(200).json({
+      status: "success",
+      message:
+        "Password reset email sent successfully. Please check your inbox.",
+    });
+  } catch (error) {
+    user.passwordResetToken = undefined;
+    user.passwordReset = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(
+      new AppError(
+        "Something went wrong while sending the password reset email. Please try again later.",
+        500
+      )
+    );
+  }
+});
+
+export const resetPassword = catchAsync((req, res, next) => {});
 
 // Protection Middleware
 export const protectRoute = catchAsync(async (req, res, next) => {

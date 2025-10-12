@@ -7,7 +7,9 @@ import {
   deleteUser,
 } from "../controllers/users.controller.js";
 import {
+  forgotPassword,
   loginUser,
+  resetPassword,
   signUpUser,
 } from "../controllers/authentication.controller.js";
 
@@ -27,6 +29,8 @@ router.param("id", (req, res, next, val) => {
 
 router.route("/signup").post(signUpUser);
 router.route("/login").post(loginUser);
+router.route("/forgotpassword").post(forgotPassword);
+router.route("/resetpassword/:token").patch(resetPassword);
 
 router.route("/").get(getUsers).post(postUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
