@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import mongoose from "mongoose";
 import validator from "validator";
 import { genSalt, hash, compare } from "bcrypt";
@@ -41,6 +42,8 @@ const userSchema = new Schema(
       },
     },
     passwordChangedAt: Date,
+    passwordResetToken: { type: String },
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );
@@ -96,6 +99,20 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // false eqals password has not changed
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  console.log({ resetToken }, this.passwordResetToken);
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = model("User", userSchema);
