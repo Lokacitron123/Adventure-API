@@ -9,8 +9,10 @@ import {
 import {
   forgotPassword,
   loginUser,
+  protectRoute,
   resetPassword,
   signUpUser,
+  updatePassword,
 } from "../controllers/authentication.controller.js";
 
 const router = express.Router();
@@ -31,6 +33,7 @@ router.route("/signup").post(signUpUser);
 router.route("/login").post(loginUser);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").patch(resetPassword);
+router.route("/profile/password/").patch(protectRoute, updatePassword);
 
 router.route("/").get(getUsers).post(postUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);

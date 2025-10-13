@@ -79,6 +79,13 @@ userSchema.pre("findOneAndUpdate", async function (next) {
   next();
 });
 
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // Makes sure that the signToken generates tokens that are created after passwordChangedAt
+  next();
+});
+
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword

@@ -5,6 +5,7 @@ import User from "../models/user.model.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { sendEmail } from "../utils/email.js";
+import { hash } from "bcrypt";
 
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -128,13 +129,55 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
 
-  await user.save();
+  await user.save(); // Middleware auto updates changedPasswordAt on save
 
   const token = signToken(user._id);
 
   res.status(200).json({
     status: "success",
     token,
+  });
+});
+
+export const updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(
+      new AppError("Please provide both your current and new password.", 400)
+    );
+  }
+
+  // 1) Get user
+  const user = await User.findById(req.user.id).select("+password");
+
+  // 2) Check if old password is correct and if user exists
+  if (!user) {
+    return next(new AppError("User not found.", 404));
+  }
+
+  // 3) Check if current password is correct
+  const isPasswordCorrect = await user.correctPassword(
+    currentPassword,
+    user.password
+  );
+
+  if (!isPasswordCorrect) {
+    return next(new AppError("Your current password is incorrect.", 401));
+  }
+
+  // 4) Update password and save (triggers hashing middleware)
+  // Skipping confirmPassword validator because of eaze of use for the user
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  // 5) Log in user (send new JWT)
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: "success",
+    token,
+    message: "Password updated successfully.",
   });
 });
 
