@@ -13,6 +13,20 @@ const signToken = (id) => {
   });
 };
 
+const createSendStatusAndToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      user: user,
+    },
+  });
+};
+
+// -------------------------------------- //
+
 export const signUpUser = catchAsync(async (req, res, next) => {
   const { name, email, password, confirmPassword } = req.body;
 
@@ -23,15 +37,7 @@ export const signUpUser = catchAsync(async (req, res, next) => {
     confirmPassword: confirmPassword,
   });
 
-  const token = signToken(newUser._id);
-
-  res.status(201).json({
-    status: "success",
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendStatusAndToken(newUser, 201, res);
 });
 
 export const loginUser = catchAsync(async (req, res, next) => {
@@ -59,12 +65,7 @@ export const loginUser = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect email or password provided", 401));
   }
 
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-  });
+  createSendStatusAndToken(user, 200, res);
 });
 
 export const logoutUser = catchAsync(async (req, res, next) => {
@@ -131,12 +132,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   await user.save(); // Middleware auto updates changedPasswordAt on save
 
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-  });
+  createSendStatusAndToken(user, 200, res);
 });
 
 export const updatePassword = catchAsync(async (req, res, next) => {
@@ -172,13 +168,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 5) Log in user (send new JWT)
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    message: "Password updated successfully.",
-  });
+  createSendStatusAndToken(user, 200, res);
 });
 
 // Protection Middleware
@@ -232,7 +222,6 @@ export const protectRoute = catchAsync(async (req, res, next) => {
 });
 
 // Express calls middleware
-//
 export const restrictTo = (...roles) => {
   // roles is equal to an array and is available in this outer scope
   return (req, res, next) => {
