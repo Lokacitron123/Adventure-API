@@ -48,6 +48,12 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+// Only return active users on find
+userSchema.pre(/^find/, async function (next) {
+  this.find({ active: true });
+  next();
+});
+
 userSchema.pre("save", async function (next) {
   // Only runs if modified
   if (!this.isModified("password")) {
