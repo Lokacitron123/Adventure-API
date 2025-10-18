@@ -3,6 +3,8 @@ import { fileURLToPath } from "url";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import User from "../models/user.model.js";
+import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
 
 // Helpers
 function genId() {
@@ -96,12 +98,8 @@ export const postUser = async (req, res) => {
       });
     }
 
-    const hashedPassword = await hashPassword(data.password);
-
-    const newUser = await User.create({
-      ...data,
-      password: hashedPassword,
-    });
+    // ✅ Let the pre('save') middleware hash password
+    const newUser = await User.create(data);
 
     res.status(201).json({
       status: "success",
@@ -183,3 +181,33 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+// ------- For logged in users -------------- //
+export const updateMe = catchAsync(async (req, res, next) => {
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Request body cannot be empty.",
+    });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      ...req.body,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  console.log("Updated user: ", user);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: "User updated successfully",
+    },
+  });
+});
