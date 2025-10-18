@@ -5,6 +5,7 @@ import {
   postUser,
   updateUser,
   deleteUser,
+  updateMe,
 } from "../controllers/users.controller.js";
 import {
   forgotPassword,
@@ -14,6 +15,8 @@ import {
   signUpUser,
   updatePassword,
 } from "../controllers/authentication.controller.js";
+
+import { updateMeSchema, validateBody } from "../utils/validate.schemas.js";
 
 const router = express.Router();
 
@@ -34,6 +37,9 @@ router.route("/login").post(loginUser);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").patch(resetPassword);
 router.route("/profile/password/").patch(protectRoute, updatePassword);
+router
+  .route("/profile/update")
+  .patch(protectRoute, validateBody(updateMeSchema), updateMe);
 
 router.route("/").get(getUsers).post(postUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
