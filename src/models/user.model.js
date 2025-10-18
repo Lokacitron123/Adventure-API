@@ -22,7 +22,7 @@ const userSchema = new Schema(
       enum: ["user", "guide", "lead-guide", "admin"],
       default: "user",
     },
-    active: { type: Boolean, default: true },
+    active: { type: Boolean, default: true, select: false },
     photo: String,
     password: {
       type: String,

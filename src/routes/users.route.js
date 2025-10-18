@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   updateMe,
+  deleteMe,
 } from "../controllers/users.controller.js";
 import {
   forgotPassword,
@@ -40,6 +41,7 @@ router.route("/profile/password/").patch(protectRoute, updatePassword);
 router
   .route("/profile/update")
   .patch(protectRoute, validateBody(updateMeSchema), updateMe);
+router.route("/profile/delete").delete(protectRoute, deleteMe);
 
 router.route("/").get(getUsers).post(postUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);

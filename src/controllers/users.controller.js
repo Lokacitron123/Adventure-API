@@ -202,12 +202,19 @@ export const updateMe = catchAsync(async (req, res, next) => {
     }
   );
 
-  console.log("Updated user: ", user);
-
   res.status(200).json({
     status: "success",
     data: {
       user: "User updated successfully",
     },
+  });
+});
+
+export const deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndDelete(req.user.id);
+
+  res.status(200).json({
+    status: "success",
+    message: "User deleted successfully",
   });
 });
