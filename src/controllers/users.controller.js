@@ -204,16 +204,19 @@ export const updateMe = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: {
-      user: "User updated successfully",
-    },
+    message: "User updated successfully",
   });
 });
 
 export const deleteMe = catchAsync(async (req, res, next) => {
+  // Option 1 - Hard Delete
   await User.findByIdAndDelete(req.user.id);
 
-  res.status(200).json({
+  // Option 2 - Soft Delete
+  // Update the route to patch
+  // await User.findByIDandUpdate(req.user.id, {active: false})
+
+  res.status(204).json({
     status: "success",
     message: "User deleted successfully",
   });
