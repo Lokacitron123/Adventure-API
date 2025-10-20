@@ -50,7 +50,7 @@ const userSchema = new Schema(
 
 // Only return active users on find
 userSchema.pre(/^find/, async function (next) {
-  this.find({ active: true });
+  this.find({ active: { $ne: false } });
   next();
 });
 
