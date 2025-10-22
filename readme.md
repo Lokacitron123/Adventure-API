@@ -1,7 +1,7 @@
 # ADVENTUREApi
 
 A **Backend API** inspired by [Jonas Schmedtmann's Node.js API course](https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/), reimagined and enhanced for a portfolio project.  
-ADVENTUREApi allows customers to search for and book various adventure tours, while dealing backend design patterns, validation, and error handling.
+ADVENTUREApi allows customers to search for and book various adventure tours, while dealing backend with design patterns, validation, and error handling.
 
 ---
 
