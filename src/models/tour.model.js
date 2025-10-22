@@ -65,6 +65,13 @@ const tourSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // Refs guides
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,

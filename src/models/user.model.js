@@ -40,12 +40,28 @@ const userSchema = new Schema(
         },
         message: "Passwords do not match",
       },
+      // Tour guide specific values
+      bio: String,
+      languages: [String],
+      ratingsAverage: {
+        type: Number,
+        default: 1,
+        min: [1, "Rating cant be lower than 1.0"],
+        max: [5, "Rating cant be higher than 5.0"],
+      },
+      ratingsQuantity: { type: Number, default: 0 },
     },
     passwordChangedAt: Date,
     passwordResetToken: { type: String },
     passwordResetExpires: Date,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: { virtuals: true },
+  }
 );
 
 // Only return active users on find
