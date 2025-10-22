@@ -64,6 +64,13 @@ const userSchema = new Schema(
   }
 );
 
+// Return tour for guides
+userSchema.virtual("tours", {
+  ref: "Tour", // The model to populate
+  foreignField: "guides", // The field in Tour that refers to this User
+  localField: "_id", // The User _id
+});
+
 // Only return active users on find
 userSchema.pre(/^find/, async function (next) {
   this.find({ active: { $ne: false } });

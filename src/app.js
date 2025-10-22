@@ -58,8 +58,17 @@ app.use(
   })
 ); // Parsing JSON
 
+// ---- NOTE ----
+// *** express-mongo-sanitize throws an error, look into possible fixes ***
 // Data sanitization against NoSQL query injection
-app.use(mongoSanitize());
+// app.use(
+//   mongoSanitize({
+//     onQuery: false, // do NOT mutate req.query
+//     onBody: true, // sanitize req.body
+//     onParams: true, // optionally sanitize req.params
+//     replaceWith: "_",
+//   })
+// );
 
 // Preventing parameter pollution
 app.use(

@@ -101,6 +101,7 @@ export const getTours = catchAsync(async (req, res, next) => {
   if (!tours || tours.length === 0) {
     return next(AppError("No tours found", 404));
   }
+
   res.status(200).json({
     status: "success",
     results: tours.length,
