@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import AppError from "./utils/appError.js";
 import { globalErrorHandler } from "./controllers/errors.controller.js";
 import { rateLimiter } from "./utils/rateLimiter.js";
+import mongoSanitize from "express-mongo-sanitize";
 
 // Routes
 import toursRoute from "./routes/tours.route.js";
@@ -38,7 +39,11 @@ connectDB();
 app.set("query parser", (str) => qs.parse(str));
 
 // Middleware
-app.use(helmet()); // Sets security HTTP headers
+
+// Sets security HTTP headers
+app.use(helmet()); // Note: Helmet helps protect against common attacks by setting headers like CSP, X-Frame-Options, and X-Content-Type-Options.
+// You should still validate and sanitize user input, escape output, and configure a stricter Content Security Policy for full XSS protection.
+
 app.use("/api", rateLimiter); // Limits requets
 
 if (process.env.NODE_ENV === "development") {
@@ -52,6 +57,10 @@ app.use(
   })
 ); // Parsing JSON
 
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Routes
 app.use("/api/v1/tours", toursRoute);
 app.use("/api/v1/users", usersRoute);
 
