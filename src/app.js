@@ -4,10 +4,12 @@ import qs from "qs";
 import { connectDB } from "./config/db.js";
 import AppError from "./utils/appError.js";
 import { globalErrorHandler } from "./controllers/errors.controller.js";
+import { rateLimiter } from "./utils/rateLimiter.js";
 
 // Routes
 import toursRoute from "./routes/tours.route.js";
 import usersRoute from "./routes/users.route.js";
+import helmet from "helmet";
 
 process.on("uncaughtException", (error) => {
   console.log("Uncaught Exception! Shutting down...");
@@ -36,10 +38,19 @@ connectDB();
 app.set("query parser", (str) => qs.parse(str));
 
 // Middleware
+app.use(helmet()); // Sets security HTTP headers
+app.use("/api", rateLimiter); // Limits requets
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Logs requests, usefull info in dev mode
 }
-app.use(express.json()); // Parsing JSON
+
+// Body barser that reads data from req.body
+app.use(
+  express.json({
+    limit: "10kb",
+  })
+); // Parsing JSON
 
 app.use("/api/v1/tours", toursRoute);
 app.use("/api/v1/users", usersRoute);
