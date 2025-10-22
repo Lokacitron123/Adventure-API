@@ -14,7 +14,10 @@ import {
   protectRoute,
   restrictTo,
 } from "../controllers/authentication.controller.js";
-import { getTourGuides } from "../controllers/guides.controller.js";
+import {
+  assignGuideToTour,
+  getTourGuides,
+} from "../controllers/guides.controller.js";
 
 const router = express.Router();
 
@@ -32,6 +35,9 @@ router.param("id", (req, res, next, val) => {
 });
 
 router.route("/tour-guides").get(getTourGuides);
+router
+  .route("/assign-guides")
+  .patch(protectRoute, restrictTo("lead-guide", "admin"), assignGuideToTour);
 
 router.route("/top-5-cheap").get(aliasTopTours, getTours);
 router.route("/tour-stats").get(getTourStats);
