@@ -43,6 +43,9 @@ export const assignGuideToTour = catchAsync(async (req, res, next) => {
     return next(new AppError("User is not a guide", 400));
   }
 
+  tour.guides = tour.guides || [];
+  guide.tours = guide.tours || [];
+
   // Add guide to tour
   if (!tour.guides.includes(guide._id)) {
     tour.guides.push(guide._id);
@@ -54,7 +57,7 @@ export const assignGuideToTour = catchAsync(async (req, res, next) => {
   }
 
   // Save both at the same time
-  await Promise.all([tour.save(), guide.save()]);
+  await Promise.all([tour.save(), guide.save({ validateBeforeSave: false })]);
 
   res.status(200).json({
     status: "success",
