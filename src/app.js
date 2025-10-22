@@ -11,6 +11,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import toursRoute from "./routes/tours.route.js";
 import usersRoute from "./routes/users.route.js";
 import helmet from "helmet";
+import hpp from "hpp";
 
 process.on("uncaughtException", (error) => {
   console.log("Uncaught Exception! Shutting down...");
@@ -59,6 +60,13 @@ app.use(
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
+
+// Preventing parameter pollution
+app.use(
+  hpp({
+    whitelist: ["duration"], // The whitelist is for allowed duplicate params combinations
+  })
+);
 
 // Routes
 app.use("/api/v1/tours", toursRoute);
