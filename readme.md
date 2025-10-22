@@ -1,7 +1,7 @@
 # ADVENTUREApi
 
 A **Backend API** inspired by [Jonas Schmedtmann's Node.js API course](https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/), reimagined and enhanced for a portfolio project.  
-ADVENTUREApi allows customers to search for and book various adventure tours, while demonstrating professional backend design patterns, validation, and error handling.
+ADVENTUREApi allows customers to search for and book various adventure tours, while dealing backend design patterns, validation, and error handling.
 
 ---
 
@@ -12,12 +12,12 @@ ADVENTUREApi allows customers to search for and book various adventure tours, wh
 - **Zod validation** for request data (sanitization and type safety)
 - **Mongoose schema validations** for database integrity
 - **Centralized error handling** with custom `AppError` and global middleware
-- **Duplicate key and validation errors** properly handled
+- **Duplicate key and validation errors** 
 - **Security features**:
   - Input sanitization to prevent NoSQL injection
   - CORS and Helmet headers
   - Rate limiting
-- **JWT-based authentication** (optional feature to demonstrate secure routes)
+- **JWT-based authentication** 
 - **Aggregations and virtuals** for enhanced tour analytics
 
 ---
@@ -27,7 +27,7 @@ ADVENTUREApi allows customers to search for and book various adventure tours, wh
 - Node.js & Express
 - MongoDB & Mongoose
 - Zod for input validation
-- JWT for authentication (optional)
+- JWT for authentication 
 - Thunder Client for API testing
 
 ---
@@ -54,7 +54,9 @@ ADVENTUREApi allows customers to search for and book various adventure tours, wh
    npm install
    ```
 
-3. Create a .env file:
+3. Create a MongoDB database
+
+3.1 Create a .env file:
 
    ```bash
      PORT=3000
