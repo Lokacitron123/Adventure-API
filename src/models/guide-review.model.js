@@ -28,3 +28,5 @@ const guideReviewSchema = new Schema(
     timestamps: true,
   }
 );
+
+export default guideReviewSchema;
