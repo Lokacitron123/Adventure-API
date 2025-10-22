@@ -64,7 +64,14 @@ app.use(mongoSanitize());
 // Preventing parameter pollution
 app.use(
   hpp({
-    whitelist: ["duration"], // The whitelist is for allowed duplicate params combinations
+    whitelist: [
+      "duration",
+      "ratingAvarage",
+      "ratingQuantity",
+      "maxGroupSize",
+      "difficulty",
+      "price",
+    ], // The whitelist is for allowed duplicate params combinations
   })
 );
 
